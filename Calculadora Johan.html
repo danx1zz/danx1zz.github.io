@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Científica 🔬</title>
+    <style>
+        /* Importamos una fuente de Google para un look más moderno */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap');
+
+        :root {
+            --bg-color: #1a1b28;
+            --display-bg: #232537;
+            --button-bg: #2a2d3f;
+            --button-hover-bg: #3b3e55;
+            --operator-bg: #ff9f0a;
+            --operator-hover-bg: #ffb33a;
+            --function-bg: #4e5066;
+            --function-hover-bg: #646781;
+            --text-color: #ffffff;
+            --accent-color: #61dafb;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #121212, #2a2a2e);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 375px;
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .display {
+            background-color: var(--display-bg);
+            color: var(--text-color);
+            padding: 20px;
+            text-align: right;
+            border-bottom: 1px solid var(--accent-color);
+        }
+
+        #expression {
+            min-height: 24px;
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            word-break: break-all;
+        }
+
+        #result {
+            min-height: 48px;
+            font-size: 2.5rem;
+            font-weight: 400;
+            word-break: break-all;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background-color: #161720;
+        }
+
+        button {
+            border: none;
+            padding: 20px 0;
+            font-size: 1.2rem;
+            font-weight: 400;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            outline: none;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-bg);
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-operator {
+            background-color: var(--operator-bg);
+            font-size: 1.5rem;
+        }
+        .btn-operator:hover {
+            background-color: var(--operator-hover-bg);
+        }
+
+        .btn-function {
+            background-color: var(--function-bg);
+        }
+        .btn-function:hover {
+            background-color: var(--function-hover-bg);
+        }
+
+        .btn-equals {
+            grid-column: span 2;
+            background-color: var(--accent-color);
+            color: #1a1b28;
+            font-size: 1.5rem;
+        }
+        .btn-equals:hover {
+            background-color: #82e4ff;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.75rem;
+            color: #6a6d84;
+            background-color: var(--display-bg);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div class="display">
+            <div id="expression">&nbsp;</div>
+            <div id="result">0</div>
+        </div>
+        <div class="buttons-grid">
+            <button onclick="addFunction('Math.sin(')" class="btn-function">sin</button>
+            <button onclick="addFunction('Math.cos(')" class="btn-function">cos</button>
+            <button onclick="addFunction('Math.tan(')" class="btn-function">tan</button>
+            <button onclick="addFunction('Math.PI')" class="btn-function">π</button>
+            <button onclick="clearAll()" class="btn-function" style="color: #ff5e57;">AC</button>
+            
+            <button onclick="addFunction('Math.log10(')" class="btn-function">log</button>
+            <button onclick="addFunction('Math.log(')" class="btn-function">ln</button>
+            <button onclick="addFunction('(')" class="btn-function">(</button>
+            <button onclick="addFunction(')')" class="btn-function">)</button>
+            <button onclick="deleteLast()" class="btn-function" style="color: #ff9f0a;">DEL</button>
+            
+            <button onclick="addFunction('**2')" class="btn-function">x²</button>
+            <button onclick="addFunction('Math.sqrt(')" class="btn-function">√</button>
+            <button onclick="addFunction('**')" class="btn-function">xʸ</button>
+            <button onclick="appendValue('7')">7</button>
+            <button onclick="appendValue('8')">8</button>
+            
+            <button onclick="appendValue('9')">9</button>
+            <button onclick="appendValue('/')" class="btn-operator">÷</button>
+            <button onclick="appendValue('4')">4</button>
+            <button onclick="appendValue('5')">5</button>
+            <button onclick="appendValue('6')">6</button>
+
+            <button onclick="appendValue('*')" class="btn-operator">×</button>
+            <button onclick="appendValue('1')">1</button>
+            <button onclick="appendValue('2')">2</button>
+            <button onclick="appendValue('3')">3</button>
+            <button onclick="appendValue('-')" class="btn-operator">-</button>
+            
+            <button onclick="appendValue('0')">0</button>
+            <button onclick="appendValue('.')">.</button>
+            <button onclick="calculateResult()" class="btn-equals">=</button>
+            <button onclick="appendValue('+')" class="btn-operator">+</button>
+        </div>
+        <div class="footer">
+            Hecho por Johan
+        </div>
+    </div>
+
+    <script>
+        const expressionDiv = document.getElementById('expression');
+        const resultDiv = document.getElementById('result');
+
+        let currentExpression = '';
+        let resultDisplayed = false;
+
+        function appendValue(value) {
+            if (resultDisplayed) {
+                // Si se muestra un resultado, y se presiona un número (no un operador), se limpia la expresión.
+                if (!['+', '-', '*', '/', '**'].includes(value)) {
+                    currentExpression = '';
+                }
+                resultDisplayed = false;
+            }
+            currentExpression += value;
+            updateDisplay();
+        }
+
+        function addFunction(func) {
+            if (resultDisplayed) {
+                currentExpression = '';
+                resultDisplayed = false;
+            }
+            currentExpression += func;
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            // Reemplazamos los operadores de código por símbolos visuales
+            expressionDiv.innerText = currentExpression
+                .replace(/\*/g, '×')
+                .replace(/\//g, '÷')
+                .replace(/\*\*/g, '^');
+        }
+
+        function clearAll() {
+            currentExpression = '';
+            expressionDiv.innerHTML = '&nbsp;';
+            resultDiv.innerText = '0';
+            resultDisplayed = false;
+        }
+        
+        function deleteLast() {
+            if (resultDisplayed) {
+                clearAll();
+                return;
+            }
+            currentExpression = currentExpression.slice(0, -1);
+            updateDisplay();
+        }
+
+        function calculateResult() {
+            if (currentExpression === '') {
+                return;
+            }
+
+            try {
+                // Reemplazamos el símbolo de potencia visual por el operador de JS
+                let evalExpression = currentExpression;
+
+                // Cierre automático de paréntesis si es necesario
+                const openBrackets = (evalExpression.match(/\(/g) || []).length;
+                const closeBrackets = (evalExpression.match(/\)/g) || []).length;
+                if (openBrackets > closeBrackets) {
+                    evalExpression += ')'.repeat(openBrackets - closeBrackets);
+                }
+
+                // Evaluar la expresión
+                const result = eval(evalExpression);
+
+                // Formatear resultado para evitar números muy largos
+                resultDiv.innerText = Number(result.toFixed(10));
+                expressionDiv.innerText = evalExpression
+                    .replace(/\*/g, '×')
+                    .replace(/\//g, '÷')
+                    .replace(/\*\*/g, '^');
+
+                currentExpression = result.toString();
+                resultDisplayed = true;
+
+            } catch (error) {
+                resultDiv.innerText = 'Error';
+                currentExpression = '';
+                resultDisplayed = true;
+                console.error("Error en cálculo:", error);
+            }
+        }
+        
+        // Bonus: permitir uso del teclado
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (/[0-9.]/.test(key)) {
+                appendValue(key);
+            } else if (/[+\-*/]/.test(key)) {
+                appendValue(key);
+            } else if (key === 'Enter' || key === '=') {
+                event.preventDefault(); // Evita que se active el último botón presionado
+                calculateResult();
+            } else if (key === 'Backspace') {
+                deleteLast();
+            } else if (key === 'Escape' || key.toLowerCase() === 'c') {
+                clearAll();
+            } else if (key === '(') {
+                 addFunction('(');
+            } else if (key === ')') {
+                 addFunction(')');
+            } else if (key === '^') {
+                 addFunction('**');
+            }
+        });
+
+    </script>
+</body>
+</html>
